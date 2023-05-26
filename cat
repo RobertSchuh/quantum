@@ -1,0 +1,9 @@
+Manim Community v0.17.3
+
+[05/11/23 17:13:53] INFO     Animation 0 : Using cached data (hash : 1413466013_3427497900_223132457)                                                                                                                cairo_renderer.py:78
+                    INFO     Combining to Movie file.                                                                                                                                                            scene_file_writer.py:617
+                    INFO                                                                                                                                                                                         scene_file_writer.py:736
+                             File ready at '/home/robert/PycharmProjects/quantum/media/videos/scene/1080p60/CreateCircle.mp4'                                                                                                            
+                                                                                                                                                                                                                                         
+                    INFO     Rendered CreateCircle                                                                                                                                                                           scene.py:241
+                             Played 1 animations                                                                                                                                                                                         
