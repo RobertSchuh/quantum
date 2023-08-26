@@ -1,0 +1,338 @@
+\documentclass[12pt]{article}
+
+\usepackage{report}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage[colorlinks=true, linkcolor=black, citecolor=blue, urlcolor=blue]{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{lipsum}		% Can be removed after putting your text content
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{doi}
+\setcitestyle{aysep={,}}
+\usepackage{physics}
+\usepackage{gensymb}
+
+\usepackage{amsmath}
+\newcommand{\Mod}[1]{\ (\mathrm{mod}\ #1)}
+
+\title{Nanophotonic for quantum information technology: Quantum Cryptography}
+
+\author{Robert Schuh\\
+\AND
+Student ID: 3452419\\
+\AND
+\AND
+\AND
+\AND
+	Advanced Seminar presentation SoSe 23\\
+\AND
+	University of Stuttgart\\
+}
+
+% Uncomment to remove the date
+\date{\today}
+
+
+\begin{document}
+\maketitle
+
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+
+\newpage
+\thispagestyle{empty}
+\begin{abstract}
+	Cryptography is everywhere in the modern world.
+	Internet communication, banking, military secrets, countless applications where secure and reliable encryption schemes are important.
+	Upcoming quantum technologies offer both threats and opportunities to encryption.
+	This report presents the very basics of quantum cryptography.
+\end{abstract}
+
+
+% keywords can be removed
+% \keywords{First keyword \and Second keyword \and More}
+
+
+\newpage
+\setcounter{page}{1}
+%\section{Introduction}
+
+
+
+\section{Classical Cryptography}
+
+\subsection{The RSA Algorithm}
+\label{sec:rsa}
+Most encryption today uses the RSA Algorithm~\citep{rsa}.
+
+Let's say Alice wants to send Bob a secure message using this system.
+For this, Bob first chooses two large primes $q, p$ and
+calculates their product $n=qp$ and two other numbers $d, e$ with the property $m^{de} \equiv m \Mod n$ for all integers $0<m<n$.
+
+The numbers $(e, n)$ are the public key which Bob shares with the world, including Alice.
+The private key $(d, n)$ is kept secret.
+
+Now Alice can take her message $m$, calculate an encrypted message $c = m^e \Mod n$, send over a public channel,
+and only Bob can decrypt her message with $m = c^d \Mod n$.
+If the message Alice wants to send is larger than $n$, she can split it into several pieces and encrypt them individually.
+
+\subsection{Issues with RSA}
+The security of RSA relies on the fact that finding $d$ from $(e, n)$ requires first finding $q$ and $p$,
+and finding the prime factors of a product of primes is very difficult to do if the primes are sufficiently large.
+Prime factorization is presumed to be impossible in polynomial time on a classical computer.
+
+However, with Shor's algorithm (see: Presentation by \citet{photonic}) it would be possible to solve this problem in polynomial time on a quantum computer.
+Current quantum computers do still struggle with factoring relatively small primes, much smaller than the primes currently used in encryption, but it may be possible to break currently used encryption in the not too distant future.
+
+\subsection{The One-time pad}
+
+The ``One-time pad'' refers to a way to turn a message into an encrypted message that is completely random and contains no patterns whatsoever that any arbitrary amount of classical or quantum computing power could exploit.
+This requires both the sender (Alice) and the recipient (Bob) to have a shared secret key which is random, and known only to them.
+
+Despite the complicated-sounding name, the scheme is extremely simple:
+Alice performs a bitwise XOR operation on the message and the key, sends the result to Bob, who performs the same bitwise XOR to decrypt the message.
+
+While this scheme is perfectly secure, the key needs to be as large or larger than the message, and can only be used once.
+If the same key was used several times, there would be repeating patterns that could be exploited to gain information about the contents of the message.
+
+The challenge of quantum cryptography then becomes to securely establish shared keys between distant locations without the possibility of the keys being compromised.
+
+\section{The BB84 scheme}
+
+The first major quantum cryptography scheme is BB84~\citep{bennett1984quantum}.
+
+\subsection{How BB84 works}
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{fig/bb84}
+	\caption{Illustration of BB84 protocol~\citep{Carrasco_Casado_2016}.}
+	\label{fig:bb84}
+\end{figure}
+
+For this, the sender Alice chooses two random strings of bits, one for the key bits and one for her basis choice.
+
+Alice then encodes each of her key bits as a photon, either by vertically or horizontally polarizing it, or by diagonally polarizing it, depending on her random basis choice.
+Bob also chooses a random basis to measure each photon, and stores both the result and the basis he used.
+
+After all photons are transmitted and measured, Alice and Bob discuss over a non-secure classical channel which basis they used for each bit.
+As shown in the table in figure~\ref{fig:bb84}, those bits where they used a different basis to encode and measure, and the bits where the photon got lost and didn't get measured by Bob, are discarded.
+The rest of the bits makes up the shared key.
+
+If an eavesdropper (let's call her Eve) intercepts the photons, she will not be able to know which basis Alice and Bob are using.
+She also cannot measure the polarisation without destroying the photons due to the no-cloning theorem.
+If she guesses the basis, she has a 50\% chance of measuring and re-transmitting the photons in a different basis, and each photon that Alice sent in one basis and Eve re-sent in another has a 50\% chance to be measured by Bob as the opposite of what Alice sent.
+Therefore, if Eve attempts to measure the photons, about 25\% of the bits that Bob ends up with will be different from what Alice sent, which they can easily detect by sharing a sample of their generated key.
+Eavesdropping is thus easily detected.
+
+\subsection{Eavesdropping on BB84: Photon number splitting}
+
+The security of BB84 due to the no-cloning theorem relies on each bit being encoded in a single photon.
+Real light sources provide many photons, and for example an attenuated laser might provide a single photon most of the time, but has a chance to produce two or more photons sometimes.
+
+Let us consider an example setup where BB84 is broken:
+\begin{itemize}
+	\item Alice and Bob attempt to implement BB84.
+	\item The connection between Alice and Bob is a lossy fiber with only 0.01\% of photons making it through.
+	\item Alice's photon source produces two photons instead of one in 1\% of pulses.
+	\item Eve has much more advanced technology than Alice and Bob.
+\end{itemize}
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{fig/pns}
+	\caption{Illustration of Photon Number Splitting attack~\citep{pns}.}
+	\label{fig:pns}
+\end{figure}
+
+In this case, Eve could perform a Photon Number Splitting attack.
+Eve intercepts the photon pulses and measures the number of photons in each packet.
+Those with only one photon she destroys, but for those with two she splits off one to store it for later, and sends to other to Bob.
+Once Alice and Bob are communicating which basis they used for each bit, Eve can measure her stored photons using the same basis as Bob and obtain the same result as him, and therefore the key.
+To prevent Alice and Bob from noticing that 99\% of the pulses are destroyed in the process, she can replace part of the lossy fiber with her own more advanced one, so that Bob still receives 0.01\% of pulses.
+
+This attack obviously requires Eve to do several very difficult things.
+Measuring the number of photons in each pulse without disturbing the quantum state that encodes the information is difficult but possible, and Alice cannot do it in this scenario, otherwise she would not be sending out two-photon pulses.
+Storing all these photons until the basis choice is announced requires Eve to reliably store vast amounts of quantum states, as the key to encrypt large files would be millions of bits long.
+However, it is theoretically possible, so steps need to be taken to avoid such attacks in order to make quantum cryptography truly secure.
+
+\subsection{Beating PNS: Decoy states or Quantum dots}
+
+There are two common methods of defeating a Photon Number Splitting attack.
+
+In the Decoy State method, Alice intentionally injects some two-photons pulses as decoys.
+If a PNS attack is performed, the decoy pulses will have a significantly higher chance of making it through than the non-decoys, which allows an attack to be detected~\citep{Bozzio_2022}.
+
+The second method is to use Quantum Dot photon sources, which unlike attenuated lasers reliably produce single photons (see: Presentation by \citet{quantumdot}).
+
+\subsection{Time-bin encoding}
+
+One issue with the BB84 protocol is that the polarization of a photon is a poor encoding of information, as the polarization easily gets disturbed in a fiber optic cable.
+A modification of BB84 is to encode the information in the photon differently.
+In time-bin encoding, each photon wave packed it split into two packets offset in time, and the information is encoded in the relative phase between the two.
+This can be accomplished with no moving parts except for a Piezo crystal that stretches a fiber by a very small amount, as in fig.~\ref{fig:timebin}.
+The random choice at Bob's end does not need any active components, it can be performed by a random beam splitter.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{fig/timebin}
+	\caption{Illustration of a time-bin setup~\citep{boaron2018secure}.}
+	\label{fig:timebin}
+\end{figure}
+
+With such a time-bin encoding setup and using decoy states to avoid photon-number splitting, quantum key distribution has been performed over a 421 km long fiber connected at bit rates of 6.5 bits per second~\citep{boaron2018secure}.
+
+\section{Ekert Protocol: Entangled states}
+
+A different kind of quantum key distribution can be performed using quantum entanglement.
+
+\subsection{Brief Recap: Bell states and the CHSH inequality}
+
+The CHSH inequality~\citep{PhysRevLett.23.880} is a well-known test used to prove that quantum mechanics is not just a hidden variable theory.
+
+Pairs of entangled qubits (usually photons) are generated and measured in two detectors, A and B, which can distinguish between two results, $+$ and $-$, based on detector parameters (usually polarization angles), $a$ and $b$, as shown in fig.~\ref{fig:chsh}.
+The correlation $E(a, b)$ is defined by the coincidence counts, $E(a, b) = \frac{N_{++}+N_{--}-N_{+-}-N_{-+}}{N_\text{total}}$, where $N_{++}$ is the number of events where both detectors measure $+$, and so on.
+
+Running this four times with different values for $a$ and $b$, we can obtain $S = E(a, b) - E(a, b') + E(a', b) + E(a', b')$.
+In classical hidden variable theories, it can be proven that $\abs{S} \leq 2$.
+But in quantum mechanics, higher values can be obtained for $S$.
+In the case of entangled polarised photons in a Bell state $\frac{1}{\sqrt{2}}\qty(\ket{++} + \ket{--})$ with the polariser angles $a = 0\degree, a' = 45\degree, b = 22.5\degree, b' = 67.5\degree$ we can measure $S = 2 \sqrt{2} > 2$.
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{fig/ekert}
+	\caption{Illustration of a CHSH experimental setup~\citep{chsh}.}
+	\label{fig:chsh}
+\end{figure}
+
+\subsection{Using CHSH for cryptography: Ekert 91}
+
+The Ekert 91 protocol~\citep{ekert1991quantum} modifies the CHSH test to use it for cryptography.
+
+A photon source creates entangled Bell state photons and sends them to Alice and Bob, who have the detectors A and B.
+Alice randomly chooses her detector angle from $0\degree, 22.5\degree$ and $45\degree$.
+Bob uses the angles $22.5\degree, 45\degree$ and $67.5\degree$.
+
+After measuring lots of photon pairs in randomly chosen basis orientations, Alice and Bob communicate which angles they used.
+In 2/9 cases, they both used $22.5\degree$ or both used $45\degree$, which means that their result are correlated and can be used for an encryption key.
+In 5/9 cases, their angles differed by $22.5\degree$ or $67.5\degree$, which means that their results once shared can be used to calculate $S$.
+By checking that $S$ is indeed $2\sqrt{2}$, Alice and Bob can verify that they do indeed have a Bell state, which shows both that their key is usable and that there was no eavesdropping.
+If Eve attempted to interfere with the communication, Alice and Bob could detect that they no longer have a Bell state.
+If Eve interfered in such a way that Alice and Bob do not detect it, all she could find out is that they are getting Bell states, which gives her no information about the key.
+
+Thus, the proof that quantum entanglement is real can be directly turned into a proof that this communication channel is secure.
+
+\section{Other vulnerabilities}
+
+In theory, a properly implemented quantum cryptography scheme is secure against eavesdropping, with the fundamental nature of the universe making it impossible to listen in without being detected.
+
+In practice, there are some additional challenges one needs to keep in mind.
+
+\begin{itemize}
+	\item Real equipment does not always behave exactly like the equations modeling it assume.
+	\item If the equations behind an encryption scheme only model the photons created by Alice and Bob, that does not necessarily mean that those are the only photons at play.
+	Eve could, for example, shine her own laser through the fiber into Alice and Bob's devices and gain information from reflected photons, such as information about polariser angles.
+	\item Another issue is the classical communication channel needed by the encryption protocols.
+	The classical channel does not need to be secure against eavesdropping - otherwise there would be no need for quantum cryptography - but it does need to be secure against Eve sending false messages.
+	If Eve could fake messages from Alice and Bob, then a man-in-the-middle attack becomes possible wherein Alice and Bob think they're securely communicating with each other, even though in reality both are securely communicating with Eve.
+	Alice and Bob need some way of verifying that they are talking to each other, and this verification method must be less vulnerable than the RSA system that the quantum system intends to replace.
+	\item Finally, quantum cryptography devices will still be vulnerable to the same attacks as other electronic devices.
+	``Quantum'' does not protect against malware infection or secret backdoors installed by the manufacturer.
+\end{itemize}
+
+
+%\section{Examples of citations, figures, tables, references}
+%\label{sec:others}
+%
+%\subsection{Citations}
+%Citations use \verb+natbib+. The documentation may be found at
+%\begin{center}
+%	\url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
+%\end{center}
+%
+%Here is an example usage of the two main commands (\verb+citet+ and \verb+citep+): Some people thought a thing \citep{kour2014real, hadash2018estimate} but other people thought something else \citep{kour2014fast}. Many people have speculated that if we knew exactly why \citet{kour2014fast} thought this\dots
+%
+%\subsection{Figures}
+%\lipsum[10]
+%See Figure \ref{fig:fig1}. Here is how you add footnotes. \footnote{Sample of the first footnote.}
+%\lipsum[11]
+%
+%\begin{figure}
+%	\centering
+%	\fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+%	\caption{Sample figure caption.}
+%	\label{fig:fig1}
+%\end{figure}
+%
+%\subsection{Tables}
+%See awesome Table~\ref{tab:table}.
+%
+%The documentation for \verb+booktabs+ (`Publication quality tables in LaTeX') is available from:
+%\begin{center}
+%	\url{https://www.ctan.org/pkg/booktabs}
+%\end{center}
+%
+%
+%\begin{table}
+%	\caption{Sample table title}
+%	\centering
+%	\begin{tabular}{lll}
+%		\toprule
+%		\multicolumn{2}{c}{Part}                   \\
+%		\cmidrule(r){1-2}
+%		Name     & Description     & Size ($\mu$m) \\
+%		\midrule
+%		Dendrite & Input terminal  & $\sim$100     \\
+%		Axon     & Output terminal & $\sim$10      \\
+%		Soma     & Cell body       & up to $10^6$  \\
+%		\bottomrule
+%	\end{tabular}
+%	\label{tab:table}
+%\end{table}
+%
+%\subsection{Lists}
+%\begin{itemize}
+%	\item Lorem ipsum dolor sit amet
+%	\item consectetur adipiscing elit.
+%	\item Aliquam dignissim blandit est, in dictum tortor gravida eget. In ac rutrum magna.
+%\end{itemize}
+
+\newpage
+\bibliographystyle{acl_natbib}
+\bibliography{references}  %%% Uncomment this line and comment out the ``thebibliography'' section below to use the external .bib file (using bibtex) .
+
+
+%%% Uncomment this section and comment out the \bibliography{references} line above to use inline references.
+% \begin{thebibliography}{1}
+
+% 	\bibitem{kour2014real}
+% 	George Kour and Raid Saabne.
+% 	\newblock Real-time segmentation of on-line handwritten arabic script.
+% 	\newblock In {\em Frontiers in Handwriting Recognition (ICFHR), 2014 14th
+% 			International Conference on}, pages 417--422. IEEE, 2014.
+
+% 	\bibitem{kour2014fast}
+% 	George Kour and Raid Saabne.
+% 	\newblock Fast classification of handwritten on-line arabic characters.
+% 	\newblock In {\em Soft Computing and Pattern Recognition (SoCPaR), 2014 6th
+% 			International Conference of}, pages 312--318. IEEE, 2014.
+
+% 	\bibitem{hadash2018estimate}
+% 	Guy Hadash, Einat Kermany, Boaz Carmeli, Ofer Lavi, George Kour, and Alon
+% 	Jacovi.
+% 	\newblock Estimate and replace: A novel approach to integrating deep neural
+% 	networks with existing applications.
+% 	\newblock {\em arXiv preprint arXiv:1804.09028}, 2018.
+
+% \end{thebibliography}
+
+
+\end{document}
