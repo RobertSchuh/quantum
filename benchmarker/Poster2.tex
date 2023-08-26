@@ -1,0 +1,313 @@
+\documentclass[a0paper,25pt]{tikzposter}
+
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage[customcolors]{hf-tikz}
+\usepackage[utf8]{inputenc}
+\usepackage{multicol} 
+\usepackage{qrcode} 
+% \usepackage{newtxtext,newtxmath}
+%\usepackage{graphicx}
+\usepackage{rotating}
+\usetikzlibrary{calc}
+\usetikzlibrary{math,matrix}
+\usetikzlibrary{patterns}
+\usetikzlibrary{arrows.meta}
+\usetikzlibrary{fadings, shapes.arrows,shadows}
+\usetikzlibrary{backgrounds}
+\definecolor{cycle1}{HTML}{0072BD}
+\definecolor{cycle2}{HTML}{D95319} 
+\definecolor{cycle3}{HTML}{EDB120}
+\definecolor{cycle4}{HTML}{7E2F8E}
+\definecolor{cycle5}{HTML}{77AC30}
+\definecolor{cycle6}{HTML}{4DBEEE}
+\definecolor{cycle7}{HTML}{A2142F}
+\definecolor{anthrazit}{HTML}{323232}
+\definecolor{mittelblau}{HTML}{004191}
+\definecolor{hellblau}{HTML}{00BEFF}
+\setdescription{font=\normalfont}
+\newcommand{\alert}[1]{\textcolor[HTML]{116699}{\textbf{#1}}}
+\newcommand{\Section}[1]{\section*{\centering \textcolor[HTML]{116699}{#1}}}
+
+% colour for the boxed equations
+\hfsetfillcolor{blue!10}
+\hfsetbordercolor{blue}
+
+% multi column settings
+\setlength{\columnsep}{2cm}
+
+%%%% TIKZ POSTER Setting
+
+% shows small comment on how the poster was made at bottom of poster
+\tikzposterlatexaffectionproofoff
+
+%% Title, Author, Institute
+% \title{\parbox{\linewidth}{\centering Apparent Entropy Production in Networks
+% with \\Hidden Degrees of Freedom}}
+\title{Quantum Benchmarking}
+\author{Robert Schuh}
+\institute{Schwerpunktmodul activity in the Quantum Computing course}
+
+% Default, Basic, Rays*, Simple*, Envelope*, Wave, Board, Autumn, Desert
+\usetheme{Envelope}
+% \usetheme{Simple}
+% \usetitlestyle{Empty}
+% definitions
+
+%Default , Basic , Minimal , Envelope , Corner , Slide , TornOut
+\useblockstyle{Envelope}
+
+\newcommand{\sapp}{\ensuremath{\Delta \tilde{s}_{\text{tot}}}} 
+\newcommand{\stot}{\ensuremath{\Delta s_{\text{tot}}}} 
+\newcommand{\e}{\text{e}}
+\newcommand{\pon}{p_{\text{on}}^{\mathrm{s}}}
+\newcommand{\poff}{p_{\text{off}}^{\mathrm{s}}}
+
+\renewcommand{\labelitemi}{\textcolor{anthrazit}{\textbullet}}
+\renewcommand{\labelitemii}{\scriptsize\textcolor{anthrazit}{$\blacksquare$}}
+
+\tikzset{poster thick/.style={line width=5pt}}
+
+% Define custom title style
+\pgfdeclareimage{logo}{./unistuttgart_logo-eps-converted-to.pdf}
+\definetitlestyle{custom}{
+    width=\paperwidth, roundedcorners=0, linewidth=0pt, innersep=1.5cm,
+    titletotopverticalspace=0mm, titletoblockverticalspace=20mm,
+    titlegraphictotitledistance=10pt, titletextscale=1
+}{
+    \coordinate (topleft) at (\titleposleft,\titlepostop);
+    \coordinate (topright) at (\titleposright,\titlepostop);
+    \coordinate (lefttoright) at (\titlewidth,0);
+    \coordinate (head) at (0,\titlepostop-\titleposbottom);
+    %
+    \draw[draw=none, bottom color=blocktitlebgcolor!90!black, %
+        top color=titlebgcolor!90] %
+        (topleft) -- ($(topleft)-0.2*(head)$) .. controls ($(topleft)-(head)+(1,0)$)
+        .. ($(topleft)-(head)+0.2*(lefttoright)$) --
+        ($(topleft)-(head)+0.8*(lefttoright)$) .. controls ($(topright)-(head)-(1,0)$)
+        .. %
+        ($(topright)-0.2*(head)$) -- (topright) -- cycle;
+	\begin{scope}
+    \clip %
+        (topleft) -- ($(topleft)-0.2*(head)$) .. controls ($(topleft)-(head)+(1,0)$)
+        .. ($(topleft)-(head)+0.2*(lefttoright)$) --
+        ($(topleft)-(head)+0.8*(lefttoright)$) .. controls ($(topright)-(head)-(1,0)$)
+        .. %
+        ($(topright)-0.2*(head)$) -- (topright) -- cycle;
+	\node at ($(topright) - (0,0)$)
+	{\includegraphics[scale=15]{unistuttgart_logo}};
+	\end{scope}
+}
+\definetitlestyle{customEmpty}{
+    width=\paperwidth, roundedcorners=0, linewidth=0pt, innersep=1.5cm,
+    titletotopverticalspace=0mm, titletoblockverticalspace=20mm,
+    titlegraphictotitledistance=10pt, titletextscale=1
+}{
+    \coordinate (topleft) at (\titleposleft,\titlepostop);
+    \coordinate (topright) at (\titleposright,\titlepostop);
+    \coordinate (lefttoright) at (\titlewidth,0);
+    \coordinate (head) at (0,\titlepostop-\titleposbottom);
+    %
+    \draw[color=blocktitlebgcolor] %
+        (topleft) -- ($(topleft)-0.2*(head)$) .. controls ($(topleft)-(head)+(1,0)$)
+        .. ($(topleft)-(head)+0.2*(lefttoright)$) --
+        ($(topleft)-(head)+0.8*(lefttoright)$) .. controls ($(topright)-(head)-(1,0)$)
+        .. %
+        ($(topright)-0.2*(head)$) -- (topright) -- cycle;
+	\begin{scope}
+    \clip %
+        (topleft) -- ($(topleft)-0.2*(head)$) .. controls ($(topleft)-(head)+(1,0)$)
+        .. ($(topleft)-(head)+0.2*(lefttoright)$) --
+        ($(topleft)-(head)+0.8*(lefttoright)$) .. controls ($(topright)-(head)-(1,0)$)
+        .. %
+        ($(topright)-0.2*(head)$) -- (topright) -- cycle;
+	\node at ($(topright) - (0,0)$)
+	{\includegraphics[scale=15]{unistuttgart_logo}};
+	\end{scope}
+}
+
+\settitle{ \centering \vbox{
+\@titlegraphic \\[\TP@titlegraphictotitledistance] \centering
+\color{titlefgcolor} {  \Huge  \textbf{\@title} \par}
+\vspace*{1em}
+{ \huge \@author \par} \vspace*{1em} {  \LARGE \@institute}
+}}
+
+
+% use uni-stutgart colors
+
+\definebackgroundstyle{uni}{
+		\shade[shading = axis,rectangle, left color=hellblau,right
+		color=mittelblau,shading angle = -45] 
+		  (bottomleft) rectangle (topright);
+  }
+\definebackgroundstyle{empty}{}
+
+% settings for less colors in design for preview
+% \colorlet{blocktitlebgcolor}{white}
+% \colorlet{blocktitlefgcolor}{black}
+% \colorlet{titlebgcolor}{mittelblau}
+% \colorlet{titlefgcolor}{black}
+% \usetitlestyle{customEmpty}
+% \usebackgroundstyle{empty}
+
+% settings for final version
+\colorlet{blocktitlebgcolor}{mittelblau}
+\colorlet{blocktitlefgcolor}{white}
+\colorlet{titlebgcolor}{mittelblau}
+\colorlet{titlefgcolor}{white}
+\usetitlestyle{custom} 
+\usebackgroundstyle{uni}
+
+
+%fontsettings
+\usepackage{anyfontsize}
+%\usepackage{unicode-math}
+\usepackage{xcolor}
+\usepackage{tikz}
+
+
+
+\usepackage[column=0]{cellspace}
+\setlength{\cellspacetoplimit}{0.5\tabcolsep}
+\setlength{\cellspacebottomlimit}{\cellspacetoplimit}
+
+\usepackage{graphicx,booktabs,array}
+
+% \setmainfont[Path = \string~/.local/share/fonts/,
+% 	Extension = .otf,
+%    UprightFont = *-Regular,
+%       BoldFont = *-Bold,
+%     ItalicFont = *-Italic,
+% BoldItalicFont = *-BoldItalic,
+% ]{STIX2Text}
+% \setmathfont[Path = \string~/.local/share/fonts/,
+% 			Extension = .otf,
+% ]{STIX2Math} 
+% \setsansfont[
+%     Path           = \string~/.local/share/fonts/,
+%     Extension      = .ttf,
+% 	UprightFont	   = UniversforUniS55Rm-Regular, 
+% 	ItalicFont     = UniversforUniS45LtObl-Rg,
+%     BoldFont       = UniversforUniS65Bd-Regular,
+% ]{UniversforUniS55Rm-Regular}
+
+\renewcommand{\familydefault}{\sfdefault}
+
+\newcommand{\won}{w_{\text{on}}}
+\newcommand{\woff}{w_{\text{off}}}
+\newcommand{\bareDiff}{\mathcal{D}}
+\newcommand{\eul}{\mathrm{e}}
+\usepackage{physics}
+
+%\DeclareMathOperator{\erf}{erf}
+%\DeclareMathOperator{\sgn}{sgn}
+\newcommand{\doubleunderline}[1]{\underline{\underline{#1}}}
+\newcommand{\mapsfrom}{\mathrel{\reflectbox{\ensuremath{\mapsto}}}}
+\newcommand{\lang}{\left\langle}
+\newcommand{\rang}{\right\rangle}
+\newcommand{\lou}{\left(}
+\newcommand{\rou}{\right)}
+%\newcommand{\eq}[1]{\begin{equation}\let\par\relax\begin{aligned}#1\end{aligned}\end{equation}}
+\newcommand{\eq}[1]{\begin{align*}#1\end{align*}}
+\newcommand{\numeq}[1]{\begin{equation}\begin{aligned}#1\end{aligned}\end{equation}}
+\newcommand{\beq}[1]{\begin{dmath}#1\end{dmath}}
+\newcommand{\vecz}[2]{\begin{pmatrix}#1\\#2\end{pmatrix}}
+\newcommand{\diff}[1]{\text{d}#1\,}
+
+\newcommand{\limeq}{\sim}
+
+\newcommand{\xpa}{2}
+\newcommand{\xpb}{4}
+\newcommand{\xpc}{5}
+\newcommand{\xpd}{8}
+\newcommand{\xpe}{9}
+\newcommand{\xra}{1.4}
+\newcommand{\xlow}{1.5}
+\newcommand{\xhigh}{{12-\xlow}}
+\usepackage{biblatex}
+\usepackage{blindtext}
+%\addbibresource{../literature.bib}
+
+\usepackage[export]{adjustbox}
+\usepackage{siunitx}
+\newcolumntype{C}{>{\centering\arraybackslash}m{8.5em}}
+\newcolumntype{R}[2]{%
+    >{\adjustbox{angle=#1,lap=\width-(#2)}\bgroup}%
+    l%
+    <{\egroup}%
+}
+\newcommand*\rot{\multicolumn{1}{R{90}{1em}}}% no optional argument here, please!
+
+\begin{document}
+% \BackgroundPicture
+
+\maketitle
+
+\begin{columns}
+	\column{1.0}
+	\block{Benchmarking}{
+        \begin{multicols}{3}
+            []
+            \subsection*{Introduction}
+%                The current font size is \the\fontdimen6\font.\\
+%                The current font family is \fontname\font. \\
+%                Text width is \the\textwidth.
+%                Line width is \the\linewidth.
+            A new algorithm to benchmark quantum processors was created and tested on a variety of systems.
+            After the initial approach proved to have some issues, a modified version of the algorithm was tested as well.
+
+            \columnbreak
+
+%            \subsubsection*{Methodology}
+
+
+            \subsubsection*{IBMQ and Quantum Brilliance}
+            Algorithms are tested on emulated versions of IBM Quantum and Quantum Brilliance systems.
+            The error data of several IBMQ processors available on their free tier is requested through their API to simulate quantum circuits in Qiskit on backends that approximate the IBMQ systems.
+
+            \columnbreak
+            Using the Quantum Brilliance Emulator software, the same quantum circuits are simulated on several Noise Models available from the Quantum Brilliance servers.
+            The benchmarking algorithms determine how the circuits are generated and how the measured counts are processed.
+            Running the algorithms on real quantum processors would be possible, but was not attempted due to long wait times when using a free IBMQ account.
+
+
+        \end{multicols}
+    }
+\end{columns}
+\begin{columns}
+	\column{0.5}
+	\block{First approach}{
+%        Text width is \the\textwidth.
+%        Line width is \the\linewidth.
+    }
+    
+    \block{Results of first approach}{
+        \includegraphics[center]{plots/naive}
+    }
+    \block{Problems}{
+    }
+    
+	\column{0.5}
+
+    \block{Second approach}{
+    }
+
+	\block{Results of second approach}{
+        \includegraphics[center]{plots/new_attempt}
+    }
+\end{columns}
+
+\begin{columns}
+	\column{1.0}
+	\block{References}{
+        [1] {IBMQ Resources}, \emph{https://quantum-computing.ibm.com/services/resources}, {2023} \\[0pt]
+%        [2] {{P}hysikalisches {I}nstitut der Universität Stuttgart}, \emph{Chaos. Fortgeschrittenenpraktikumsversuchsanleitung.}, {2012}
+    }
+\end{columns}
+
+
+\end{document}
+
