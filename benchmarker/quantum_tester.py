@@ -105,7 +105,7 @@ def score_counts(c1, c2, naive=False):
     all_keys = set(c1.keys()) | set(c2.keys())  # get all measured result options
     values = np.array([[c1.get(key, 0), c2.get(key, 0)] for key in all_keys])
     # print(values)
-    if np.sum(values[:,1])== 0:
+    if np.sum(values[:, 1]) == 0:
         return np.nan
 
     percentages = values / np.sum(values, axis=0)
@@ -140,7 +140,7 @@ def test_on_random_circuits(tg, backends, nq=2, ng=2, nc=1, shots=1024, naive=Fa
                 counts = tg(qc, backend=backend, shots=shots)
                 score = score_counts(reference, counts, naive=naive)
             except Exception as e:
-                if not "is greater than" in str(e):
+                if not ("is greater than" in str(e) or "Not enough physical qubits" in str(e)):
                     print(f"on {backend}, {nq=}, {ng=}: {e}")
                 score = np.nan
             scores[backend].append(score)

@@ -1,17 +1,19 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
-import winsound
-import time
+import os
 
 from quantum_tester import TesterGroup, test_on_random_circuits
 
+if not "/usr/local/texlive/2023/bin/x86_64-linux" in os.environ["PATH"]:
+    os.environ["PATH"] = "/usr/local/texlive/2023/bin/x86_64-linux" + os.pathsep + os.environ["PATH"]
+
 # Initialize TesterGroup and define backends
 tg = TesterGroup()
-backends = ["ibmq_quito", "ibm_perth", "ibmq_lima", "qb-nm1", "qb-nm2", "qb-qdk1"]
+backends = ["ibm_perth", "ibmq_quito", "ibmq_lima", "qb-qdk1", "qb-nm2", "qb-nm1"]
 
 # Define parameters
-nc, shots = 30, 1000
+nc, shots = 50, 2000
 
 
 
@@ -52,11 +54,11 @@ def plot_results(ngs, nqs, results, naive, title_suffix, plot_over_gates, filena
         partial_res = np.array([result[backend] for result in results])
         ax.errorbar(
             x, np.mean(partial_res, axis=1), yerr=np.std(partial_res, axis=1),
-            label=backend, marker="x", capsize=3
+            label=backend, marker="x", capsize=10, markersize=10
         )
         ax2.errorbar(
             x, np.mean(partial_res, axis=1), yerr=np.std(partial_res, axis=1),
-            label=backend, marker="x", capsize=3
+            label=backend, marker="x", capsize=10, markersize=10
         )
     ax.grid()
     ax.legend()
@@ -70,19 +72,19 @@ def plot_results(ngs, nqs, results, naive, title_suffix, plot_over_gates, filena
         ax.set_title("New attempt - " + title_suffix)
     ax2.set_title(title_suffix)
 
-    # filename = f"plots/error_plot_{filename_suffix}.png"
-    # fig.savefig(filename)
+    filename = f"plots/error_plot_{filename_suffix}.png"
+    fig.savefig(filename)
     # plt.show(block=False)
     plt.close(fig)
 
 
 
 fig, axes = plt.subplots(2, 2, figsize=set_size(1075, fraction=1))
-fig.subplots_adjust(hspace=0.45, wspace=0.3, top=0.9, bottom=0.1, left=0.1, right=0.98)
-fig.suptitle("New attempt")
+fig.subplots_adjust(hspace=0.45, wspace=0.3, top=0.95, bottom=0.1, left=0.1, right=0.98)
+# fig.suptitle("Second attempt")
 fign, axesn = plt.subplots(2, 2, figsize=set_size(1075, fraction=1))
-fign.subplots_adjust(hspace=0.45, wspace=0.3, top=0.9, bottom=0.1, left=0.1, right=0.98)
-fign.suptitle("Naive approach")
+fign.subplots_adjust(hspace=0.45, wspace=0.3, top=0.95, bottom=0.1, left=0.1, right=0.98)
+# fign.suptitle("Naive approach")
 
 # Define test cases and plot the results
 test_cases = [
@@ -118,12 +120,3 @@ progress_bar.close()
 
 fig.savefig("plots/new_attempt.pdf")
 fign.savefig("plots/naive.pdf")
-# plt.show()
-
-# # Make a beep sound to indicate the end of the execution
-# frequency = 2000
-# duration = 1500
-# print("Done")
-# for _ in range(3):
-#     winsound.Beep(frequency, duration)
-#     time.sleep(duration / 1000)
