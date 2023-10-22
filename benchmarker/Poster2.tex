@@ -265,7 +265,7 @@
 
 
             \subsubsection*{IBMQ and Quantum Brilliance}
-            Algorithms are tested on emulated versions of IBM Quantum and Quantum Brilliance systems.
+            Algorithms are tested on emulated versions of IBM Quantum [1] and Quantum Brilliance [2] systems.
             The error data of several IBMQ processors available on their free tier is requested through their API to simulate quantum circuits in Qiskit on backends that approximate the IBMQ systems.
 
             \columnbreak
@@ -280,23 +280,64 @@
 \begin{columns}
 	\column{0.5}
 	\block{First approach}{
-%        Text width is \the\textwidth.
-%        Line width is \the\linewidth.
+        The first algorithm tested worked as follows:
+        \begin{enumerate}
+            \item Generate $n_c$ random circuits with $n_q$ qubits and $n_g$ gates.
+            \item Run the random circuits both on a perfect error-free simulator and the one that is being benchmarked for $n_s$ shots.
+            \item Compute the measurement histograms as vectors, normalized to the number of shots with $\sum_i p_i = 1$.
+            \item Calculate an error as euclidean distance between the perfect and benchmarked measurements, $\sqrt{\sum_i (p_i^\text{perfect}-p_i^\text{benchmark})^2}$.
+        \end{enumerate}
+        This error score is 0 if the benchmarked simulator matches the error-free one, and up to $\sqrt{2}$ if it is confidently incorrect,
+        for example if the error-free simulator consistently returns the "00" state but the benchmarked one consistently returns "01" on a circuit.
+
+        As $n_c$ random circuits are tested, the result is an array of error score, with the mean and standard deviation plotted.
     }
     
     \block{Results of first approach}{
-        \includegraphics[center]{plots/naive}
+        \includegraphics[center]{plots/naive} \label{fig:naive}
+        The first algorithm is tested on all the IBMQ and QB emulators for $n_c=50$ random circuits each, $n_s=2000$ shots and different numbers of qubits and gates.
     }
     \block{Problems}{
+        As immediately apparent in the figure above, the first algorithm does not work as desired.
+        For larger numbers of qubits, all the error scores of all the emulators converge and go down.
+        This is because for random circuits, the histograms tend to approach even distributions, and any errors in the quantum computers simply cause more randomness,
+        making the result even smoother.
+
+        Therefore, the result of the first algorithm is not usable to determine how good a given quantum computer is at running circuits.
+
+        Some improvement is required.
     }
     
 	\column{0.5}
 
     \block{Second approach}{
+        After the failure of the first approach, the second approach is a modification of the first algorithm.
+        \begin{enumerate}
+            \item Generate $n_c$ random circuits with $n_q$ qubits and $\text{floor}(n_g/2)$ gates.
+            \item For each random circuit, append its inverse.
+            \item Run the random circuits on a perfect error-free simulator to verify that it measures the initial state.
+            \item Run the random circuits on each emulator that is being benchmarked for $n_s$ shots.
+            \item Compute the measurement histograms, normalized to the number of shots with $\sum_i p_i = 1$.
+            \item Calculate he error score as the sum of all $p_i$ that are not the initial state.
+        \end{enumerate}
+        The resulting error score is the probability of measuring a result other than the correct one. For random results, it approaches $1-0.5^{n_q}$.
     }
 
 	\block{Results of second approach}{
         \includegraphics[center]{plots/new_attempt}
+        The second approach is tested on the same backend as the first one, with the same numbers of shots, random circuits, qubits and gates.
+
+        The results are usable: We can see that ``qdk1" can only handle 2 qubits and struggles with even very few gates, ``nm1" and ``nm2" can handle lots of qubits and gates,
+        and all the IBM systems are fairly close, with ``quito" and ``lima" being able to handle 5 qubits while ``perth" can do 7.
+
+        The error scores also always go up as gate count increases, as would be desired in a method to benchmark quantum chips.
+    }
+    \block{Notes on implementation}{
+        As both algorithms only send a circuit and a desired number of shots to either the emulated IBMQ or the QB system and only take a histogram of counts back,
+        they could easily be used on real machines.
+        However, this was not done due to lack of access to real machines without significant wait times, as the queue on IBM systems for non-paid access is several hours long.
+
+%        The implementation on the Quantum Brilliance systems was plagued by several bugs discovered in the QB codebase which required both an improvised workaround in one case and waiting for a fixed version to be released in another.
     }
 \end{columns}
 
@@ -304,6 +345,7 @@
 	\column{1.0}
 	\block{References}{
         [1] {IBMQ Resources}, \emph{https://quantum-computing.ibm.com/services/resources}, {2023} \\[0pt]
+        [2] {QB Documentation}, \emph{https://qristal.readthedocs.io/en/latest/rst/noise\_models.html}, {2023} \\[0pt]
 %        [2] {{P}hysikalisches {I}nstitut der Universität Stuttgart}, \emph{Chaos. Fortgeschrittenenpraktikumsversuchsanleitung.}, {2012}
     }
 \end{columns}
